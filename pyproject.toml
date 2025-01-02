@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "aionui"
+version = "0.1.0"
+description = "" # TODO: add description
+authors = ["AnhHoang <vutrianhhoang@gmail.com>"]
+readme = "README.md"
+license = "MIT"
+classifiers = [] # TODO: add classifiers
+packages = [{include = "aionui"}]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+black = "^24.10.0"
+playwright = "^1.49.1"
+tenacity = "^9.0.0"
+
+[tool.black]
+line-length = 120
+extend-exclude = '''
+/(
+    __pycache__
+    .venv
+    .vscode
+    .git
+    .github
+    .DS_Store
+    .env
+)
+'''
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
