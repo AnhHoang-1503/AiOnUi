@@ -1,7 +1,10 @@
 import os
+import requests
 from typing import Optional
 from ..enums.platform import Platform
 import platform
+import re
+import aiohttp
 
 
 def get_platform() -> Platform:
@@ -65,3 +68,32 @@ def get_chrome_binary_path(platform: Platform) -> Optional[str]:
             return path
 
     return None
+
+
+def clean_text(text: str):
+    text = re.sub(r"<script.*?</script>", " ", text, flags=re.DOTALL)
+    text = re.sub(r"<style.*?</style>", " ", text, flags=re.DOTALL)
+    text = re.sub(r"<.*?>", " ", text)
+    text = re.sub(r"\{.*?\}", " ", text)
+    text = text.replace("\n", " ").replace("\r", " ")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def save_image(url: str, file_path: str):
+    """Save image to file"""
+    content = requests.get(url).content
+    with open(file_path, "wb") as f:
+        f.write(content)
+    return file_path
+
+
+async def save_image(url: str, file_path: str) -> str:
+    """Save image to file asynchronously"""
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                content = await response.read()
+                with open(file_path, "wb") as f:
+                    f.write(content)
+    return file_path

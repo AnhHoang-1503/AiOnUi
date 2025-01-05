@@ -1,4 +1,5 @@
 from .models import BaseModel, GPT, Claude, Gemini
+from .exceptions import BotDetectedException
 from .config import Config
 from .enums import AiModel, ExpectedResult
 from typing import Optional, TypeVar, Type
@@ -47,7 +48,11 @@ class AiOnUI:
         """
         Sends a message to the AI model and returns the response.
         """
-        return self.model.chat(message, expected_result)
+        try:
+            return self.model.chat(message, expected_result)
+        except BotDetectedException:
+            self.logger.error("Bot detected")
+            self.handle_bot_detected()
 
     def attach_file(self, file_path: str):
         """
@@ -55,10 +60,27 @@ class AiOnUI:
         """
         return self.model.attach_file(file_path)
 
+    def handle_bot_detected(self):
+        """
+        Handles the bot detected exception.
+        """
+        self.close_browser()
+        self.set_up_browser()
+
     def __enter__(self):
         if self._playwright is None:
             self._playwright = sync_playwright().start()
 
+        self.set_up_browser()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close_browser()
+        if self._playwright is not None and not self._outer_playwright:
+            self._playwright.stop()
+            self._playwright = None
+
+    def set_up_browser(self):
         if self.config.connect_over_cdp:
             self._browser = self._playwright.chromium.connect_over_cdp(f"http://localhost:{self.config.debug_port}")
             self._context = self._browser.contexts[0]
@@ -72,9 +94,9 @@ class AiOnUI:
         model_map: dict[AiModel, Type[BaseModel]] = {AiModel.GPT: GPT, AiModel.Claude: Claude, AiModel.Gemini: Gemini}
         model_class = model_map[self._model_type]
         self.model = model_class(self.config, self._page)
-        return self
+        self.model.new_conversation()
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close_browser(self):
         try:
             if self._page is not None:
                 self._page.close()
@@ -85,8 +107,5 @@ class AiOnUI:
             if self._browser is not None and not self._outer_playwright:
                 self._browser.close()
                 self._browser = None
-            if self._playwright is not None and not self._outer_playwright:
-                self._playwright.stop()
-                self._playwright = None
         except Exception as e:
             self.logger.error(f"Error closing browser or playwright: {e}")

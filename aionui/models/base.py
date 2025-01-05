@@ -1,16 +1,25 @@
 from abc import ABC, abstractmethod
 from ..enums import ExpectedResult
-from playwright.sync_api import Page
+from playwright.sync_api import Locator, Page
 from ..config.config import Config
+import os
 
 
 class BaseModel(ABC):
     url: str
     page: Page
+    config: Config
 
     def __init__(self, config: Config, page: Page):
-        self._config = config
+        self.config = config
         self.page = page
+
+    def new_conversation(self):
+        """
+        Starts a new conversation.
+        """
+        self.page.goto(self.url)
+        self.init_instructions()
 
     def init_instructions(self):
         """
@@ -22,31 +31,46 @@ class BaseModel(ABC):
         template += "- Search for any additional information on the internet if needed.\n"
         self.chat(template)
 
-    def new_conversation(self):
+    def fill_message(self, message: str):
         """
-        Starts a new conversation.
+        Fills the message into the input field.
         """
-        self.page.goto(self.url)
-        self.init_instructions()
+        input_field = self.get_input_field()
+        input_field.fill(message)
+
+    def text_as_file(self, text: str):
+        """
+        Converts text to a file and attaches it.
+        """
+        file_name = f"attchment"
+        path = os.path.abspath()
+
+        if os.path.exists(path):
+            os.remove(path)
+
+        with open(path, "w", encoding="utf-8") as file:
+            file.write(text)
+
+        self.attach_file(path)
 
     @abstractmethod
-    def get_input_field(self):
+    def get_input_field(self) -> Locator:
         """
         Gets the input field to type messages.
         """
         pass
 
     @abstractmethod
-    def get_submit_button(self):
+    def get_submit_button(self) -> Locator:
         """
         Gets the submit button to send messages.
         """
         pass
 
     @abstractmethod
-    def get_response(self):
+    def get_text_response(self):
         """
-        Gets the response.
+        Gets the text response.
         """
         pass
 
@@ -54,6 +78,16 @@ class BaseModel(ABC):
     def get_code_block_response(self):
         """
         Gets the response in a code block.
+        """
+        pass
+
+    @abstractmethod
+    def get_image_response(self) -> str:
+        """
+        Gets the image response.
+
+        Returns:
+            str: Image url.
         """
         pass
 
@@ -80,5 +114,12 @@ class BaseModel(ABC):
     def wait_for_response(self):
         """
         Waits until the response is complete.
+        """
+        pass
+
+    @abstractmethod
+    def handle_on_error(self, error: Exception):
+        """
+        Handles when chat fails.
         """
         pass

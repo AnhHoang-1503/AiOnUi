@@ -1,3 +1,4 @@
-from .aionui import AiOnUI, AiOnUiAsync
+from .aionui import AiOnUI
+from .enums import AiModel, ExpectedResult
 
-__all__ = ["AiOnUI", "AiOnUiAsync"]
+__all__ = ["AiOnUI", "AiModel", "ExpectedResult"]
