@@ -2,4 +2,4 @@ import pytest
 
 
 def run_tests():
-    pytest.main(["-n", "auto"])
+    pytest.main(["-n", "5"])

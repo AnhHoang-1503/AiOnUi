@@ -1,5 +1,4 @@
-from .aionui import AiOnUI
-from .enums import AiModel, ExpectedResult
-from .models import GPTTool
+from .aionui import AiOnUI, AiOnUiAsync
+from .enums import AiModel, ExpectedResult, KeyboardCommand, GPTTool
 
-__all__ = ["AiOnUI", "AiModel", "ExpectedResult", "GPTTool"]
+__all__ = ["AiOnUI", "AiModel", "ExpectedResult", "KeyboardCommand", "GPTTool", "AiOnUIAsync"]
