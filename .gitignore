@@ -5,5 +5,5 @@ __pycache__
 .vscode
 *repomix*
 logs/
-mypy_cache/
+.mypy_cache/
 dist

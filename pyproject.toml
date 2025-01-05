@@ -13,6 +13,12 @@ python = "^3.13"
 black = "^24.10.0"
 playwright = "^1.49.1"
 tenacity = "^9.0.0"
+pydantic = "^2.10.4"
+pyyaml = "^6.0.2"
+
+[tool.poetry.group.dev.dependencies]
+types-pyYAML = "^6.0.12.20241230"
+mypy = "^1.14.1"
 
 [tool.black]
 line-length = 120
