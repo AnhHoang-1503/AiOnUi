@@ -36,7 +36,7 @@ def test_aionui_attach_file(config_file, playwright, content_file):
         expect(ai._page.locator("input[type='file']")).to_have_value(re.compile(r".*test.txt", re.IGNORECASE))
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="module")
 async def test_aionui_async_initialization(config_file):
     async with async_playwright() as playwright:
         async with AiOnUiAsync(AiModel.GPT, config_file, playwright) as ai:
@@ -52,7 +52,7 @@ async def test_aionui_async_initialization(config_file):
         assert ai._context is None
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="module")
 async def test_aionui_async_chat(config_file):
     async with async_playwright() as playwright:
         async with AiOnUiAsync(AiModel.GPT, config_file, playwright) as ai:
@@ -62,7 +62,7 @@ async def test_aionui_async_chat(config_file):
             assert result == "Xin chào"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="module")
 async def test_aionui_async_attach_file(config_file, content_file):
     async with async_playwright() as playwright:
         async with AiOnUiAsync(AiModel.GPT, config_file, playwright) as ai:

@@ -13,6 +13,9 @@ from playwright.async_api import (
     async_playwright,
 )
 from .utils.logger import get_logger
+import nest_asyncio
+
+nest_asyncio.apply()
 
 T = TypeVar("T", bound=BaseModel)
 
