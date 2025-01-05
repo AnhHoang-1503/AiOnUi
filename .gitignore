@@ -8,3 +8,4 @@ logs/
 .mypy_cache/
 dist
 test.py
+tests/screenshots/

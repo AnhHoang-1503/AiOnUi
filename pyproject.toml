@@ -19,9 +19,20 @@ pyperclip = "^1.9.0"
 requests = "^2.32.3"
 aiohttp = "^3.11.11"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.4"
+pytest-mock = "^3.14.0"
+pytest-cov = "^6.0.0"
+pytest-playwright = "^0.6.2"
+pytest-asyncio = "^0.25.1"
+pytest-xdist = "^3.6.1"
+
 [tool.poetry.group.dev.dependencies]
 types-pyYAML = "^6.0.12.20241230"
 mypy = "^1.14.1"
+
+[tool.poetry.scripts]
+test = "scripts:run_tests"
 
 [tool.black]
 line-length = 120

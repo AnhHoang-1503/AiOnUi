@@ -1,3 +1,4 @@
+import time
 from .models import BaseModel, GPT, Claude, Gemini
 from .exceptions import BotDetectedException
 from .config import Config
@@ -53,18 +54,29 @@ class AiOnUI:
         except BotDetectedException:
             self.logger.error("Bot detected")
             self.handle_bot_detected()
+            time.sleep(10)
+            return self.chat(message, expected_result)
 
     def attach_file(self, file_path: str):
         """
         Attaches a file to the AI model.
         """
-        return self.model.attach_file(file_path)
+        try:
+            return self.model.attach_file(file_path)
+        except BotDetectedException:
+            self.logger.error("Bot detected")
+            self.handle_bot_detected()
+            time.sleep(10)
+            return self.attach_file(file_path)
 
     def handle_bot_detected(self):
         """
         Handles the bot detected exception.
         """
         self.close_browser()
+        self._page.goto(self.model.url, wait_until="networkidle")
+        if self._page.locator("input[type='checkbox']").count() > 0:
+            self._page.locator("input[type='checkbox']").first.check()
         self.set_up_browser()
 
     def __enter__(self):

@@ -1,8 +1,10 @@
+import os
 import re
 import time
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import override
+from typing import overload, override
+from pathlib import Path
 
 import pyperclip
 from playwright.sync_api import Locator, Page, Request, Response, Route
@@ -43,8 +45,8 @@ class GPT(BaseModel):
 
     @override
     def fill_message(self, message: str):
-        self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.FocusChatInput))
-        self.page.keyboard.type(message)
+        input_field = self.get_input_field()
+        input_field.fill(message)
 
     @override
     def get_submit_button(self):
@@ -75,6 +77,7 @@ class GPT(BaseModel):
         result = pyperclip.paste()
         if result == "":
             raise ValueError("No response found")
+        result = result.replace("'", '"')
         return result
 
     @override
@@ -95,10 +98,10 @@ class GPT(BaseModel):
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."
         self.get_input_field()
-        submit_button = self.get_submit_button()
+        self.get_submit_button()
         self.fill_message(message)
         self.activate_tools(tools)
-        submit_button.click()
+        self.get_submit_button().click()
         self.wait_for_response()
         if expected_result == ExpectedResult.Image:
             return self.get_image_response()
@@ -110,20 +113,32 @@ class GPT(BaseModel):
     @override
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15))
     def attach_file(self, file_path: str):
-        file_name = file_path.split("/")[-1]
+        path = Path(file_path)
+        file_name = path.name
         file_input = self.page.locator('input[type="file"]')
         file_input.set_input_files(file_path)
         self.page.wait_for_load_state("networkidle")
-        if self.page.locator(f"text={file_name}").count() <= 0:
+        if Path(file_input.input_value()).name != file_name:
             raise ValueError("File could not be attached")
 
     @override
     def wait_for_response(self):
+        time.sleep(2)
         self.page.wait_for_load_state("networkidle")
         if self.page.locator("text=Continue generating").count() > 0:
             self.page.click("text=Continue generating")
             logger.info("Continuing generation...")
-            self.wait_for_response()
+            return self.wait_for_response()
+
+        if self.page.locator('article[data-testid^="conversation-turn"]').count() <= 0:
+            return self.wait_for_response()
+
+        if self.page.locator('[data-testid="copy-turn-action-button"]').count() <= 0:
+            return self.wait_for_response()
+
+        last_article = self.page.locator('article[data-testid^="conversation-turn"]')
+        if last_article.locator(".sr-only").last.text_content() == "You said:":
+            return self.wait_for_response()
 
     @override
     def handle_on_error(self, error: Exception):
@@ -138,14 +153,14 @@ class GPT(BaseModel):
             KeyboardCommand.Enter: "Enter",
             KeyboardCommand.CopyLastArticle: "Meta+Shift+C",
             KeyboardCommand.CopyLastCode: "Meta+Shift+;",
-            KeyboardCommand.FocusChatInput: "Shift+Esc",
+            KeyboardCommand.FocusChatInput: "Shift+Escape",
         }
 
         WINDOWS = {
             KeyboardCommand.Enter: "Enter",
             KeyboardCommand.CopyLastArticle: "Control+Shift+C",
             KeyboardCommand.CopyLastCode: "Control+Shift+;",
-            KeyboardCommand.FocusChatInput: "Shift+Esc",
+            KeyboardCommand.FocusChatInput: "Shift+Escape",
         }
 
         return MACOS[command] if self.config.platform == Platform.MACOS else WINDOWS[command]

@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
+import time
+
+from aionui.exceptions.bot_detected_exception import BotDetectedException
 from ..enums import ExpectedResult
 from playwright.sync_api import Locator, Page
 from ..config.config import Config
 import os
+import codecs
 
 
 class BaseModel(ABC):
@@ -18,7 +22,10 @@ class BaseModel(ABC):
         """
         Starts a new conversation.
         """
-        self.page.goto(self.url)
+        self.page.goto(self.url, wait_until="networkidle")
+        time.sleep(1)
+        if "just a moment" in self.page.title().lower():
+            raise BotDetectedException("Cloudflare detected")
         self.init_instructions()
 
     def init_instructions(self):
@@ -42,16 +49,18 @@ class BaseModel(ABC):
         """
         Converts text to a file and attaches it.
         """
-        file_name = f"attchment"
-        path = os.path.abspath()
+        file_name = f"attchment.txt"
+        path = os.path.abspath(file_name)
 
         if os.path.exists(path):
             os.remove(path)
 
-        with open(path, "w", encoding="utf-8") as file:
+        with codecs.open(path, "w", encoding="utf-8") as file:
             file.write(text)
 
         self.attach_file(path)
+
+        os.remove(path)
 
     @abstractmethod
     def get_input_field(self) -> Locator:
@@ -92,7 +101,7 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def chat(self, message: str, expected_result: ExpectedResult = ExpectedResult.Text):
+    def chat(self, message: str, expected_result: ExpectedResult = ExpectedResult.Text) -> str:
         """Sends a message to the AI model and returns the response.
 
         Args:

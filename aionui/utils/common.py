@@ -88,7 +88,7 @@ def save_image(url: str, file_path: str):
     return file_path
 
 
-async def save_image(url: str, file_path: str) -> str:
+async def save_image_async(url: str, file_path: str) -> str:
     """Save image to file asynchronously"""
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
