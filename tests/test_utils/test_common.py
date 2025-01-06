@@ -32,7 +32,7 @@ def test_save_image():
     os.remove(saved_path)
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_save_image_async():
     url = "https://interactive-examples.mdn.mozilla.net/media/examples/lizard.png"
     file_path = "testasync.jpg"

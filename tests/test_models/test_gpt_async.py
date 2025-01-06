@@ -10,7 +10,7 @@ from playwright.async_api import async_playwright
 import pytest_asyncio
 
 
-@pytest_asyncio.fixture(loop_scope="module")
+@pytest_asyncio.fixture
 async def gpt_async(config_file: str):
     async with async_playwright() as playwright:
         config = Config(config_file)
@@ -23,7 +23,7 @@ async def gpt_async(config_file: str):
         await page.close()
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_init_instructions(gpt_async: GPTAsync):
     await gpt_async.init_instructions()
     await expect(gpt_async.page.locator("article .sr-only").last).to_have_text(
@@ -31,25 +31,25 @@ async def test_init_instructions(gpt_async: GPTAsync):
     )
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_get_input_field(gpt_async: GPTAsync):
     input_field = await gpt_async.get_input_field()
     await expect(input_field).to_be_visible()
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_fill_message(gpt_async: GPTAsync):
     await gpt_async.fill_message("Hello")
     await expect(await gpt_async.get_input_field()).to_have_text(re.compile("Hello", re.IGNORECASE))
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_get_submit_button(gpt_async: GPTAsync):
     submit_button = await gpt_async.get_submit_button()
     await expect(submit_button).to_be_visible()
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_attach_file(gpt_async: GPTAsync, content_file):
     path = Path(content_file)
     await gpt_async.attach_file(content_file)
@@ -58,7 +58,7 @@ async def test_attach_file(gpt_async: GPTAsync, content_file):
     )
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_text_as_file(gpt_async: GPTAsync):
     await gpt_async.text_as_file("Xin chào")
     await expect(gpt_async.page.locator("input[type='file']")).to_have_value(
@@ -66,7 +66,7 @@ async def test_text_as_file(gpt_async: GPTAsync):
     )
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_chat_text(gpt_async: GPTAsync):
     result = await gpt_async.chat(
         "Trả lời chính xác từ sau, không thêm bất kỳ thông tin hoặc dấu câu nào khác: `Xin chào`",
@@ -74,7 +74,7 @@ async def test_chat_text(gpt_async: GPTAsync):
     assert result == "Xin chào"
 
 
-@pytest.mark.asyncio(loop_scope="module")
+@pytest.mark.asyncio
 async def test_chat_code(gpt_async: GPTAsync):
     result = await gpt_async.chat(
         'Trả lời lại chính xác json sau, không thêm bất kỳ thông tin nào khác: `{"message": "Xin chào"}`',

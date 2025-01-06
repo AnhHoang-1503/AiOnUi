@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pyperclip
 from playwright.sync_api import Locator, Page, Request, Response, Route
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import retry, stop_after_attempt, wait_exponential, RetryCallState
 
 from ..config import Config
 from .base import BaseModel
@@ -17,6 +17,12 @@ from ..utils.logger import get_logger
 from ..utils.common import clean_text
 
 logger = get_logger(__name__)
+
+
+def handle_reload(state: RetryCallState):
+    self: GPT = state.args[0]
+    self.page.reload()
+    self.page.wait_for_load_state("networkidle")
 
 
 class GPT(BaseModel):
@@ -81,7 +87,7 @@ class GPT(BaseModel):
         return src
 
     @override
-    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
+    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15), before_sleep=handle_reload)
     def chat(self, message: str, expected_result: ExpectedResult = ExpectedResult.Text, tools: list[GPTTool] = []):
         if expected_result == ExpectedResult.Code:
             if "return in code block" not in message.lower():
