@@ -17,8 +17,6 @@ debug_port: 9222
         f.write(config_content)
     config_file = str(config_path)
     config = Config(config_file)
-    assert config.headless is True
-    assert config.connect_over_cdp is True
     assert config.debug_port == 9222
     assert config.user_data_dir == "user_data_dir"
     assert config.chrome_binary_path == "chrome_binary_path"

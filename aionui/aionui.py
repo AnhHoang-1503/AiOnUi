@@ -14,6 +14,7 @@ from playwright.async_api import (
 )
 from .utils.logger import get_logger
 import nest_asyncio
+import subprocess
 
 nest_asyncio.apply()
 
@@ -97,14 +98,14 @@ class AiOnUI:
             self._playwright = None
 
     def set_up_browser(self):
-        if self.config.connect_over_cdp:
+        try:
             self._browser = self._playwright.chromium.connect_over_cdp(f"http://localhost:{self.config.debug_port}")
-            self._context = self._browser.contexts[0]
-        else:
-            self._context = self._playwright.chromium.launch_persistent_context(
-                headless=self.config.headless, user_data_dir=self.config.user_data_dir
-            )
+        except Exception as e:
+            subprocess.Popen([self.config.chrome_binary_path, f"--remote-debugging-port={self.config.debug_port}"])
+            time.sleep(10)
+            self._browser = self._playwright.chromium.connect_over_cdp(f"http://localhost:{self.config.debug_port}")
 
+        self._context = self._browser.contexts[0]
         self._page = self._context.new_page()
 
         model_map: dict[AiModel, Type[BaseModel]] = {AiModel.GPT: GPT, AiModel.Claude: Claude, AiModel.Gemini: Gemini}
@@ -201,16 +202,18 @@ class AiOnUiAsync:
             self._playwright = None
 
     async def set_up_browser(self):
-        if self.config.connect_over_cdp:
+        try:
             self._browser = await self._playwright.chromium.connect_over_cdp(
                 f"http://localhost:{self.config.debug_port}"
             )
-            self._context = self._browser.contexts[0]
-        else:
-            self._context = await self._playwright.chromium.launch_persistent_context(
-                headless=self.config.headless, user_data_dir=self.config.user_data_dir
+        except Exception as e:
+            subprocess.Popen([self.config.chrome_binary_path, f"--remote-debugging-port={self.config.debug_port}"])
+            time.sleep(10)
+            self._browser = await self._playwright.chromium.connect_over_cdp(
+                f"http://localhost:{self.config.debug_port}"
             )
 
+        self._context = self._browser.contexts[0]
         self._page = await self._context.new_page()
 
         model_map: dict[AiModel, Type[BaseAsyncModel]] = {

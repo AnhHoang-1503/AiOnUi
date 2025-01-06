@@ -13,12 +13,8 @@ class Config(BaseModel):
     """User data directory"""
     chrome_binary_path: Optional[str] = Field(default_factory=lambda: get_chrome_binary_path(get_platform()))
     """Chrome binary path"""
-    headless: bool = Field(default=True)
-    """Is headless mode enabled"""
-    connect_over_cdp: bool = Field(default=False)
-    """Connect to existing browser instance over CDP (Chrome DevTools Protocol)"""
     debug_port: Optional[int] = Field(default=9222)
-    """Debug port to connect over CDP (only if connect_over_cdp is True)"""
+    """Debug port to connect over CDP (Chrome DevTools Protocol)"""
 
     def __init__(self, config_path: Optional[str] = None, **kwargs):
         super().__init__(**kwargs)
