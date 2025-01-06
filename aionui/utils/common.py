@@ -24,11 +24,11 @@ def get_platform() -> Platform:
 def get_user_data_dir(platform: Platform) -> Optional[str]:
     """Get default chrome user data dir"""
     if platform == Platform.LINUX:
-        path = os.path.join(os.path.expanduser("~"), ".config", "google-chrome", "default")
+        path = os.path.join(os.path.expanduser("~"), ".config", "google-chrome")
     elif platform == Platform.MACOS:
-        path = os.path.join(os.path.expanduser("~"), "Library", "Application Support", "Google", "Chrome", "Default")
+        path = os.path.join(os.path.expanduser("~"), "Library", "Application Support", "Google", "Chrome")
     elif platform == Platform.WINDOWS:
-        path = os.path.join(os.path.expanduser("~"), "AppData", "Local", "Google", "Chrome", "User Data", "Default")
+        path = os.path.join(os.path.expanduser("~"), "AppData", "Local", "Google", "Chrome", "User Data")
     else:
         return None
 
