@@ -9,7 +9,7 @@ classifiers = [] # TODO: add classifiers
 packages = [{include = "aionui"}]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.10"
 black = "^24.10.0"
 playwright = "^1.49.1"
 tenacity = "^9.0.0"
@@ -31,9 +31,6 @@ pytest-xdist = "^3.6.1"
 [tool.poetry.group.dev.dependencies]
 types-pyYAML = "^6.0.12.20241230"
 mypy = "^1.14.1"
-
-[tool.poetry.scripts]
-test = "scripts:run_tests"
 
 [tool.black]
 line-length = 120
