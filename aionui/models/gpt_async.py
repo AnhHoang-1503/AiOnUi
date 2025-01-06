@@ -1,3 +1,4 @@
+import asyncio
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -71,6 +72,11 @@ class GPTAsync(BaseAsyncModel):
     async def chat(
         self, message: str, expected_result: ExpectedResult = ExpectedResult.Text, tools: list[GPTTool] = []
     ) -> str:
+        if "gpt" not in self.page.url.lower():
+            self.page.goto(self.url)
+            self.page.wait_for_load_state("networkidle")
+            await asyncio.sleep(2)
+
         if expected_result == ExpectedResult.Code:
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."

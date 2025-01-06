@@ -6,6 +6,7 @@ __pycache__
 *repomix*
 logs/
 .mypy_cache/
+.pytest_cache/
 dist
 test.py
 tests/screenshots/

@@ -89,6 +89,11 @@ class GPT(BaseModel):
     @override
     @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15), before_sleep=handle_reload)
     def chat(self, message: str, expected_result: ExpectedResult = ExpectedResult.Text, tools: list[GPTTool] = []):
+        if "gpt" not in self.page.url.lower():
+            self.page.goto(self.url)
+            self.page.wait_for_load_state("networkidle")
+            time.sleep(2)
+
         if expected_result == ExpectedResult.Code:
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."

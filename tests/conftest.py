@@ -9,7 +9,7 @@ from playwright.async_api import async_playwright
 @pytest.fixture(scope="session")
 def config_file(tmpdir_factory: pytest.TempdirFactory):
     config_content = """
-user_data_dir: C:\\Users\\vutri\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1
+user_data_dir: C:\\Users\\vutri\\AppData\\Local\\Google\\Chrome\\User Data
 headless: false
 """
     config_path: LocalPath = tmpdir_factory.mktemp("test_config").join("test_config.yaml")
