@@ -36,6 +36,7 @@ class BaseModel(ABC):
         template = "For my requests, please proceed as follows:\n"
         template += "- Only respond to what is requested, do not add any descriptions or explanations.\n"
         template += "- Return in a code block for JSON and code, while text remains in normal format.\n"
+        template += "- For JSON, use double quotes for keys and values, and ensure the JSON is valid.\n"
         template += "- Search for any additional information on the internet if needed.\n"
         self.chat(template)
 

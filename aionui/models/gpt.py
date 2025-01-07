@@ -67,7 +67,6 @@ class GPT(BaseModel):
         result = pyperclip.paste()
         if result == "":
             raise ValueError("No response found")
-        result = result.replace("'", '"')
         return result
 
     @override
@@ -137,6 +136,9 @@ class GPT(BaseModel):
 
         last_article = self.page.locator('article[data-testid^="conversation-turn"]')
         if last_article.locator(".sr-only").last.text_content() == "You said:":
+            return self.wait_for_response()
+
+        if last_article.locator('[data-testid="copy-turn-action-button"]').count() <= 0:
             return self.wait_for_response()
 
     @override

@@ -52,7 +52,6 @@ class GPTAsync(BaseAsyncModel):
         result = pyperclip.paste()
         if result == "":
             raise ValueError("No response found")
-        result = result.replace("'", '"')
         return result
 
     async def get_image_response(self) -> str:
@@ -127,6 +126,9 @@ class GPTAsync(BaseAsyncModel):
 
         last_article = articles.last
         if await last_article.locator(".sr-only").last.text_content() == "You said:":
+            return await self.wait_for_response()
+
+        if await last_article.locator('[data-testid="copy-turn-action-button"]').count() <= 0:
             return await self.wait_for_response()
 
     async def handle_on_error(self):
