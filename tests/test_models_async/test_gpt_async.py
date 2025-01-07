@@ -26,21 +26,25 @@ class TestGPTAsync:
 
     @pytest.mark.asyncio(loop_scope="class")
     async def test_get_input_field(self, gpt_async: GPTAsync):
+        gpt_async.page.goto("https://chatgpt.com", wait_until="networkidle")
         input_field = await gpt_async.get_input_field()
         await expect(input_field).to_be_visible()
 
     @pytest.mark.asyncio(loop_scope="class")
     async def test_fill_message(self, gpt_async: GPTAsync):
+        gpt_async.page.goto("https://chatgpt.com", wait_until="networkidle")
         await gpt_async.fill_message("Hello")
         await expect(await gpt_async.get_input_field()).to_have_text(re.compile("Hello", re.IGNORECASE))
 
     @pytest.mark.asyncio(loop_scope="class")
     async def test_get_submit_button(self, gpt_async: GPTAsync):
+        gpt_async.page.goto("https://chatgpt.com", wait_until="networkidle")
         submit_button = await gpt_async.get_submit_button()
         await expect(submit_button).to_be_visible()
 
     @pytest.mark.asyncio(loop_scope="class")
     async def test_attach_file(self, gpt_async: GPTAsync, content_file):
+        gpt_async.page.goto("https://chatgpt.com", wait_until="networkidle")
         path = Path(content_file)
         await gpt_async.attach_file(content_file)
         await expect(gpt_async.page.locator("input[type='file']")).to_have_value(
@@ -49,6 +53,7 @@ class TestGPTAsync:
 
     @pytest.mark.asyncio(loop_scope="class")
     async def test_text_as_file(self, gpt_async: GPTAsync):
+        gpt_async.page.goto("https://chatgpt.com", wait_until="networkidle")
         await gpt_async.text_as_file("Xin chào")
         await expect(gpt_async.page.locator("input[type='file']")).to_have_value(
             re.compile(r".*attachment.txt", re.IGNORECASE)

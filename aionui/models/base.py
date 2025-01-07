@@ -106,14 +106,18 @@ class BaseModel(ABC):
     @abstractmethod
     def chat(self, message: str, expected_result: Literal["text", "image", "code", "json"] = "text") -> str:
         """Sends a message to the AI model and returns the response.
+
         Args:
             message (str): The message to send to the AI model.
             expected_result (Literal["text", "image", "code", "json"], optional): The expected result type.
                 Can be "text", "image", "code", or "json". Defaults to "text".
 
         Returns:
-            str: The response from the AI model. For "text" returns plain text, for "code"/"json" returns
-                the code/JSON string, for "image" returns the image URL.
+            str: The response from the AI model. The format depends on expected_result:
+                - "text": Plain text response
+                - "image": URL to generated image
+                - "code": Code block response
+                - "json": JSON response as string
 
         Raises:
             BotDetectedException: If bot detection (e.g. Cloudflare) blocks the request.
