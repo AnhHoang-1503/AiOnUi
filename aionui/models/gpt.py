@@ -26,9 +26,6 @@ def handle_reload(state: RetryCallState):
 class GPT(BaseModel):
     url: str = "https://chatgpt.com"
 
-    def __init__(self, config: Config, page: Page):
-        super().__init__(config, page)
-
     @override
     def get_input_field(self) -> Locator:
         input_field = self.page.locator("#prompt-textarea")
@@ -64,6 +61,7 @@ class GPT(BaseModel):
         return clean_text(result)
 
     @override
+    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     def get_code_block_response(self):
         pyperclip.copy("")
         self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.CopyLastCode))
@@ -74,6 +72,7 @@ class GPT(BaseModel):
         return result
 
     @override
+    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     def get_image_response(self):
         src = (
             self.page.locator('article[data-testid^="conversation-turn"]')

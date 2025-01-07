@@ -20,9 +20,6 @@ logger = get_logger(__name__)
 class GPTAsync(BaseAsyncModel):
     url: str = "https://chatgpt.com"
 
-    def __init__(self, config: Config, page: Page):
-        super().__init__(config, page)
-
     async def get_input_field(self) -> Locator:
         input_field = self.page.locator("#prompt-textarea")
         if (await input_field.count()) > 0:

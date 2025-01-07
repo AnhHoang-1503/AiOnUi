@@ -6,6 +6,7 @@ from ..config.config import Config
 from ..exceptions import BotDetectedException
 import os
 import codecs
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 
 class BaseAsyncModel(ABC):
@@ -19,7 +20,7 @@ class BaseAsyncModel(ABC):
 
     async def new_conversation(self):
         """
-        Starts a new conversation asynchronously.
+        Starts a new conversation.
         """
         await self.page.goto(self.url, wait_until="networkidle")
         await self.page.wait_for_timeout(1000)
@@ -29,7 +30,7 @@ class BaseAsyncModel(ABC):
 
     async def init_instructions(self):
         """
-        Initializes the instructions for the AI model asynchronously.
+        Initializes the instructions for the AI model.
         """
         template = "For my requests, please proceed as follows:\n"
         template += "- Only respond to what is requested, do not add any descriptions or explanations.\n"
@@ -39,14 +40,15 @@ class BaseAsyncModel(ABC):
 
     async def fill_message(self, message: str):
         """
-        Fills the message into the input field asynchronously.
+        Fills the message into the input field.
         """
         input_field = await self.get_input_field()
         await input_field.fill(message)
 
+    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     async def text_as_file(self, text: str, file_name: str = "attachment.txt"):
         """
-        Converts text to a file and attaches it asynchronously.
+        Converts text to a file and attaches it.
 
         Args:
             text (str): The text content to write to the file
@@ -66,35 +68,35 @@ class BaseAsyncModel(ABC):
     @abstractmethod
     async def get_input_field(self) -> Locator:
         """
-        Gets the input field to type messages asynchronously.
+        Gets the input field to type messages.
         """
         pass
 
     @abstractmethod
     async def get_submit_button(self) -> Locator:
         """
-        Gets the submit button to send messages asynchronously.
+        Gets the submit button to send messages.
         """
         pass
 
     @abstractmethod
     async def get_text_response(self) -> str:
         """
-        Gets the text response asynchronously.
+        Gets the text response.
         """
         pass
 
     @abstractmethod
     async def get_code_block_response(self) -> str:
         """
-        Gets the response in a code block asynchronously.
+        Gets the response in a code block.
         """
         pass
 
     @abstractmethod
     async def get_image_response(self) -> str:
         """
-        Gets the image response asynchronously.
+        Gets the image response.
 
         Returns:
             str: Image url.
@@ -104,7 +106,7 @@ class BaseAsyncModel(ABC):
     @abstractmethod
     async def chat(self, message: str, expected_result: Literal["text", "image", "code", "json"] = "text") -> str:
         """
-        Sends a message to the AI model and returns the response asynchronously.
+        Sends a message to the AI model and returns the response.
 
         Args:
             message (str): The message to send to the AI model.
@@ -126,7 +128,7 @@ class BaseAsyncModel(ABC):
     @abstractmethod
     async def attach_file(self, file_path: str):
         """
-        Attaches a file to the AI model asynchronously.
+        Attaches a file to the AI model.
 
         Args:
             file_path (str): The path to the file to attach.
@@ -136,14 +138,14 @@ class BaseAsyncModel(ABC):
     @abstractmethod
     async def wait_for_response(self):
         """
-        Waits until the response is complete asynchronously.
+        Waits until the response is complete.
         """
         pass
 
     @abstractmethod
     async def handle_on_error(self, error: Exception):
         """
-        Handles when chat fails asynchronously.
+        Handles when chat fails.
 
         Args:
             error (Exception): The exception that was raised during chat.

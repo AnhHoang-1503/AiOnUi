@@ -7,6 +7,7 @@ from playwright.sync_api import Locator, Page
 from ..config.config import Config
 import os
 import codecs
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 
 class BaseModel(ABC):
@@ -45,6 +46,7 @@ class BaseModel(ABC):
         input_field = self.get_input_field()
         input_field.fill(message)
 
+    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     def text_as_file(self, text: str, file_name: str = "attachment.txt"):
         """
         Converts text to a file and attaches it.
@@ -80,14 +82,14 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def get_text_response(self):
+    def get_text_response(self) -> str:
         """
         Gets the text response.
         """
         pass
 
     @abstractmethod
-    def get_code_block_response(self):
+    def get_code_block_response(self) -> str:
         """
         Gets the response in a code block.
         """
