@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aionui"
-version = "0.1.1"
+version = "1.0.0"
 description = "" # TODO: add description
 authors = ["AnhHoang <vutrianhhoang@gmail.com>"]
 readme = "README.md"
