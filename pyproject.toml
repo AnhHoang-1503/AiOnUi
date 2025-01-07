@@ -27,6 +27,7 @@ pytest-cov = "^6.0.0"
 pytest-playwright = "^0.6.2"
 pytest-asyncio = "^0.25.1"
 pytest-xdist = "^3.6.1"
+pytest-rerunfailures = "^15.0"
 
 [tool.poetry.group.dev.dependencies]
 types-pyYAML = "^6.0.12.20241230"
