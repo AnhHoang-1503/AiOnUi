@@ -5,10 +5,9 @@ from typing import Literal, override
 from pathlib import Path
 
 import pyperclip
-from playwright.sync_api import Locator, Page
+from playwright.sync_api import Locator
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryCallState
 
-from ..config import Config
 from .base import BaseModel
 from ..enums import Platform, KeyboardCommand
 from ..utils.logger import get_logger

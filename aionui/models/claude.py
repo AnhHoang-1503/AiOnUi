@@ -1,4 +1,3 @@
-import os
 import time
 from pathlib import Path
 from typing import Literal, override
@@ -89,13 +88,24 @@ class Claude(BaseModel):
         file_input = self.page.locator('input[data-testid="file-upload"]')
         file_input.set_input_files(file_path)
         self.page.wait_for_load_state("networkidle")
-        if Path(file_input.input_value()).name != file_name:
+        if self.page.locator(f'[data-testid="{file_name}"]').count() <= 0:
             raise ValueError("File could not be attached")
 
     @override
     def wait_for_response(self):
-        time.sleep(2)
-        self.page.wait_for_load_state("networkidle")
+        time.sleep(3)
+
+        if self.page.locator(".font-claude-message").count() <= 0:
+            return self.wait_for_response()
+
+        if self.page.locator('[data-is-streaming="true"]').count() > 0:
+            return self.wait_for_response()
+
+        if self.page.locator('[data-is-streaming="false"]').count() <= 0:
+            return self.wait_for_response()
+
+        if self.page.locator("[data-test-render-count]").last.locator(".font-claude-message").count() <= 0:
+            return self.wait_for_response()
 
     @override
     def handle_on_error(self, error: Exception):

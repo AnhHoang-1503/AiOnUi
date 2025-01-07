@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from playwright.async_api import expect
 import pytest
-from aionui.models import GPTAsync
+from aionui.models_async import GPTAsync
 import pytest_asyncio
 from aionui import AiOnUi
 

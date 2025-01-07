@@ -5,10 +5,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pyperclip
-from playwright.async_api import Locator, Page
+from playwright.async_api import Locator
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from ..config import Config
 from ..enums import Platform, KeyboardCommand
 from ..utils.logger import get_logger
 from ..utils.common import clean_text
