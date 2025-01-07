@@ -5,6 +5,7 @@ from playwright.sync_api import expect
 from aionui import AiOnUi
 from aionui.models import Gemini
 from pathlib import Path
+from aionui.utils.common import save_image
 
 
 @pytest.fixture(scope="class")
@@ -14,7 +15,7 @@ def gemini(config_file):
         yield model
 
 
-class TestClaude:
+class TestGemini:
     def test_init_instructions(self, gemini: Gemini):
         gemini.init_instructions()
         expect(gemini.page.locator("model-response").last).to_have_text(re.compile(".+"))
@@ -22,7 +23,7 @@ class TestClaude:
     @pytest.mark.dependency(depends=["test_init_instructions"])
     def test_chat_text(self, gemini: Gemini):
         result = gemini.chat(
-            "Trả lời chính xác từ sau, không thêm bất kỳ thông tin hoặc dấu câu nào khác: `Xin chào`",
+            "Trả lời chính xác như sau, không thêm bất kỳ thông tin hoặc dấu câu nào khác: `Xin chào`",
         )
         assert result == "Xin chào"
 
@@ -37,13 +38,11 @@ class TestClaude:
 
     @pytest.mark.dependency(depends=["test_chat_code"])
     def test_attach_file(self, gemini: Gemini, content_file):
-        gemini.page.goto(gemini.url, wait_until="networkidle")
         path = Path(content_file)
         gemini.attach_file(content_file)
         expect(gemini.page.locator(f'[data-test-id="file-name"][title="{path.name}"]')).to_be_visible()
 
     @pytest.mark.dependency(depends=["test_attach_file"])
     def test_text_as_file(self, gemini: Gemini):
-        gemini.page.goto(gemini.url, wait_until="networkidle")
         gemini.text_as_file("Xin chào")
         expect(gemini.page.locator(f'[data-test-id="file-name"][title="attachment.txt"]')).to_be_visible()

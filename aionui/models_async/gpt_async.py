@@ -74,8 +74,7 @@ class GPTAsync(BaseAsyncModel):
     ) -> str:
         if "gpt" not in self.page.url.lower():
             await self.page.goto(self.url)
-            await self.page.wait_for_load_state("networkidle")
-            await asyncio.sleep(2)
+            await self.page.wait_for_timeout(3000)
 
         if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
@@ -104,14 +103,13 @@ class GPTAsync(BaseAsyncModel):
         file_name = path.name
         file_input = self.page.locator('input[type="file"]')
         await file_input.set_input_files(file_path)
-        await self.page.wait_for_load_state("networkidle")
+        await self.page.wait_for_timeout(3000)
 
         if Path(await file_input.input_value()).name != file_name:
             raise ValueError("File could not be attached")
 
     async def wait_for_response(self):
-        await self.page.wait_for_timeout(2000)  # 2 seconds
-        await self.page.wait_for_load_state("networkidle")
+        await self.page.wait_for_timeout(3000)
 
         continue_btn = self.page.locator("text=Continue generating")
         if await continue_btn.count() > 0:

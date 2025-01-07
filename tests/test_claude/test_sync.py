@@ -37,13 +37,13 @@ class TestClaude:
 
     @pytest.mark.dependency(depends=["test_chat_code"])
     def test_attach_file(self, claude: Claude, content_file):
-        claude.page.goto(claude.url, wait_until="networkidle")
+        claude.page.goto(claude.url)
         path = Path(content_file)
         claude.attach_file(content_file)
         expect(claude.page.locator(f'[data-testid="{path.name}"]')).to_be_visible()
 
     @pytest.mark.dependency(depends=["test_attach_file"])
     def test_text_as_file(self, claude: Claude):
-        claude.page.goto(claude.url, wait_until="networkidle")
+        claude.page.goto(claude.url)
         claude.text_as_file("Xin chào")
         expect(claude.page.locator(f'[data-testid="attachment.txt"]')).to_be_visible()

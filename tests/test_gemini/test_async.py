@@ -6,6 +6,7 @@ from aionui import AiOnUi
 from aionui.models_async import GeminiAsync
 from pathlib import Path
 import pytest_asyncio
+from aionui.utils.common import save_image_async
 
 
 @pytest_asyncio.fixture(scope="class", loop_scope="class")
@@ -15,7 +16,7 @@ async def gemini_async(config_file):
         yield model
 
 
-class TestClaudeAsync:
+class TestGeminiAsync:
     @pytest.mark.asyncio(loop_scope="class")
     async def test_init_instructions(self, gemini_async: GeminiAsync):
         await gemini_async.init_instructions()
@@ -25,7 +26,7 @@ class TestClaudeAsync:
     @pytest.mark.dependency(depends=["test_init_instructions"])
     async def test_chat_text(self, gemini_async: GeminiAsync):
         result = await gemini_async.chat(
-            "Trả lời chính xác từ sau, không thêm bất kỳ thông tin hoặc dấu câu nào khác: `Xin chào`",
+            "Trả lời chính xác như sau, không thêm bất kỳ thông tin hoặc dấu câu nào khác: `Xin chào`",
         )
         assert result == "Xin chào"
 
@@ -42,14 +43,12 @@ class TestClaudeAsync:
     @pytest.mark.asyncio(loop_scope="class")
     @pytest.mark.dependency(depends=["test_chat_code"])
     async def test_attach_file(self, gemini_async: GeminiAsync, content_file):
-        await gemini_async.page.goto(gemini_async.url, wait_until="networkidle")
         path = Path(content_file)
         await gemini_async.attach_file(content_file)
-        await expect(gemini_async.page.locator(f'[data-testid="{path.name}"]')).to_be_visible()
+        await expect(gemini_async.page.locator(f'[data-test-id="file-name"][title="{path.name}"]')).to_be_visible()
 
     @pytest.mark.asyncio(loop_scope="class")
     @pytest.mark.dependency(depends=["test_attach_file"])
     async def test_text_as_file(self, gemini_async: GeminiAsync):
-        await gemini_async.page.goto(gemini_async.url, wait_until="networkidle")
         await gemini_async.text_as_file("Xin chào")
-        await expect(gemini_async.page.locator(f'[data-testid="attachment.txt"]')).to_be_visible()
+        await expect(gemini_async.page.locator(f'[data-test-id="file-name"][title="attachment.txt"]')).to_be_visible()

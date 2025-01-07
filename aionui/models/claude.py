@@ -66,8 +66,7 @@ class Claude(BaseModel):
     ) -> str:
         if "claude" not in self.page.url.lower():
             self.page.goto(self.url)
-            self.page.wait_for_load_state("networkidle")
-            time.sleep(2)
+            time.sleep(3)
 
         if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
@@ -86,7 +85,7 @@ class Claude(BaseModel):
         file_name = path.name
         file_input = self.page.locator('input[data-testid="file-upload"]')
         file_input.set_input_files(file_path)
-        self.page.wait_for_load_state("networkidle")
+        time.sleep(3)
         if self.page.locator(f'[data-testid="{file_name}"]').count() <= 0:
             raise ValueError("File could not be attached")
 
@@ -118,4 +117,4 @@ class Claude(BaseModel):
         for message in list_message:
             input_field.type(message)
             input_field.press("Shift+Enter")
-            self.page.wait_for_timeout(3000)
+        self.page.wait_for_timeout(3000)

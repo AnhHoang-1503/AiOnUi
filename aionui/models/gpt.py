@@ -19,7 +19,7 @@ logger = get_logger(__name__)
 def handle_reload(state: RetryCallState):
     self: GPT = state.args[0]
     self.page.reload()
-    self.page.wait_for_load_state("networkidle")
+    time.sleep(3)
 
 
 class GPT(BaseModel):
@@ -92,8 +92,7 @@ class GPT(BaseModel):
     ):
         if "gpt" not in self.page.url.lower():
             self.page.goto(self.url)
-            self.page.wait_for_load_state("networkidle")
-            time.sleep(2)
+            time.sleep(3)
 
         if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
@@ -118,14 +117,13 @@ class GPT(BaseModel):
         file_name = path.name
         file_input = self.page.locator('input[type="file"]')
         file_input.set_input_files(file_path)
-        self.page.wait_for_load_state("networkidle")
+        time.sleep(3)
         if Path(file_input.input_value()).name != file_name:
             raise ValueError("File could not be attached")
 
     @override
     def wait_for_response(self):
-        time.sleep(2)
-        self.page.wait_for_load_state("networkidle")
+        time.sleep(3)
         if self.page.locator("text=Continue generating").count() > 0:
             self.page.click("text=Continue generating")
             logger.info("Continuing generation...")

@@ -23,8 +23,8 @@ class BaseModel(ABC):
         """
         Starts a new conversation.
         """
-        self.page.goto(self.url, wait_until="networkidle")
-        time.sleep(1)
+        self.page.goto(self.url)
+        time.sleep(3)
         if "just a moment" in self.page.title().lower():
             raise BotDetectedException("Cloudflare detected")
         self.init_instructions()

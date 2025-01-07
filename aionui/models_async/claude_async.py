@@ -66,8 +66,7 @@ class ClaudeAsync(BaseAsyncModel):
     ) -> str:
         if "claude" not in self.page.url.lower():
             await self.page.goto(self.url)
-            await self.page.wait_for_load_state("networkidle")
-            await self.page.wait_for_timeout(2000)
+            await self.page.wait_for_timeout(3000)
 
         if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
@@ -89,7 +88,7 @@ class ClaudeAsync(BaseAsyncModel):
         file_name = path.name
         file_input = self.page.locator('input[data-testid="file-upload"]')
         await file_input.set_input_files(file_path)
-        await self.page.wait_for_load_state("networkidle")
+        await self.page.wait_for_timeout(3000)
         if await self.page.locator(f'[data-testid="{file_name}"]').count() <= 0:
             raise ValueError("File could not be attached")
 
@@ -120,5 +119,6 @@ class ClaudeAsync(BaseAsyncModel):
         list_message = message.split("\n")
         for message in list_message:
             await input_field.type(message)
-            await self.page.wait_for_timeout(3000)
             await input_field.press("Shift+Enter")
+
+        await self.page.wait_for_timeout(3000)

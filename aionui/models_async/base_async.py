@@ -22,8 +22,8 @@ class BaseAsyncModel(ABC):
         """
         Starts a new conversation.
         """
-        await self.page.goto(self.url, wait_until="networkidle")
-        await self.page.wait_for_timeout(1000)
+        await self.page.goto(self.url)
+        await self.page.wait_for_timeout(3000)
         if "just a moment" in (await self.page.title()).lower():
             raise BotDetectedException("Cloudflare detected")
         await self.init_instructions()

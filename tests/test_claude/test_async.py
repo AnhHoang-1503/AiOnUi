@@ -42,7 +42,7 @@ class TestClaudeAsync:
     @pytest.mark.asyncio(loop_scope="class")
     @pytest.mark.dependency(depends=["test_chat_code"])
     async def test_attach_file(self, claude_async: ClaudeAsync, content_file):
-        await claude_async.page.goto(claude_async.url, wait_until="networkidle")
+        await claude_async.page.goto(claude_async.url)
         path = Path(content_file)
         await claude_async.attach_file(content_file)
         await expect(claude_async.page.locator(f'[data-testid="{path.name}"]')).to_be_visible()
@@ -50,6 +50,6 @@ class TestClaudeAsync:
     @pytest.mark.asyncio(loop_scope="class")
     @pytest.mark.dependency(depends=["test_attach_file"])
     async def test_text_as_file(self, claude_async: ClaudeAsync):
-        await claude_async.page.goto(claude_async.url, wait_until="networkidle")
+        await claude_async.page.goto(claude_async.url)
         await claude_async.text_as_file("Xin chào")
         await expect(claude_async.page.locator(f'[data-testid="attachment.txt"]')).to_be_visible()
