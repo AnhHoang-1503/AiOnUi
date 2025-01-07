@@ -72,7 +72,6 @@ class Claude(BaseModel):
         if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."
-        self.get_input_field()
         self.fill_message(message)
         self.get_submit_button().click()
         self.wait_for_response()
@@ -110,3 +109,13 @@ class Claude(BaseModel):
     @override
     def handle_on_error(self, error: Exception):
         return super().handle_on_error(error)
+
+    @override
+    def fill_message(self, message: str):
+        input_field = self.get_input_field()
+        input_field.fill("")
+        list_message = message.split("\n")
+        for message in list_message:
+            input_field.type(message)
+            input_field.press("Shift+Enter")
+            self.page.wait_for_timeout(3000)

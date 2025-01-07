@@ -44,9 +44,7 @@ class BaseModel(ABC):
         Fills the message into the input field.
         """
         input_field = self.get_input_field()
-        input_field.fill("")
-        input_field.type(message)
-        time.sleep(3)
+        input_field.fill(message)
 
     @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     def text_as_file(self, text: str, file_name: str = "attachment.txt"):
