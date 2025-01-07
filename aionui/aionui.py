@@ -1,5 +1,5 @@
-from contextlib import _AsyncGeneratorContextManager, asynccontextmanager, contextmanager, _GeneratorContextManager
-from typing import Optional, overload, Union, Literal
+from contextlib import asynccontextmanager, contextmanager
+from typing import Optional, overload, Union, Literal, Any, Generator, AsyncGenerator
 import subprocess
 import time
 import asyncio
@@ -113,16 +113,27 @@ class AiOnUi:
 
     # region Async Api
     @overload
-    async def model_async(self, model: Literal["gpt"]) -> _AsyncGeneratorContextManager[GPTAsync]: ...
+    @asynccontextmanager
+    async def model_async(self, model: Literal["gpt"]) -> AsyncGenerator[GPTAsync, Any, None]: ...
 
     @overload
-    async def model_async(self, model: Literal["claude"]) -> _AsyncGeneratorContextManager[ClaudeAsync]: ...
+    @asynccontextmanager
+    async def model_async(self, model: Literal["claude"]) -> AsyncGenerator[ClaudeAsync, Any, None]: ...
 
     @overload
-    async def model_async(self, model: Literal["gemini"]) -> _AsyncGeneratorContextManager[GeminiAsync]: ...
+    @asynccontextmanager
+    async def model_async(self, model: Literal["gemini"]) -> AsyncGenerator[GeminiAsync, Any, None]: ...
+
+    @overload
+    @asynccontextmanager
+    async def model_async(
+        self, model: Literal["gpt", "claude", "gemini"]
+    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync], Any, None]: ...
 
     @asynccontextmanager
-    async def model_async(self, model: Literal["gpt", "claude", "gemini"]):
+    async def model_async(
+        self, model: Literal["gpt", "claude", "gemini"]
+    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync], Any, None]:
         async with self.get_page_async() as page:
             if model == "gpt":
                 yield GPTAsync(self.config, page)
@@ -132,7 +143,7 @@ class AiOnUi:
                 yield GeminiAsync(self.config, page)
 
     @asynccontextmanager
-    async def get_page_async(self):
+    async def get_page_async(self) -> AsyncGenerator[AsyncPage, Any, None]:
         if self._page_async is not None:
             yield self._page_async
         elif self._context_async is not None:
@@ -182,16 +193,25 @@ class AiOnUi:
 
     # region Sync Api
     @overload
-    def model_sync(self, model: Literal["gpt"]) -> _GeneratorContextManager[GPT]: ...
+    @contextmanager
+    def model_sync(self, model: Literal["gpt"]) -> Generator[GPT, Any, None]: ...
 
     @overload
-    def model_sync(self, model: Literal["claude"]) -> _GeneratorContextManager[Claude]: ...
+    @contextmanager
+    def model_sync(self, model: Literal["claude"]) -> Generator[Claude, Any, None]: ...
 
     @overload
-    def model_sync(self, model: Literal["gemini"]) -> _GeneratorContextManager[Gemini]: ...
+    @contextmanager
+    def model_sync(self, model: Literal["gemini"]) -> Generator[Gemini, Any, None]: ...
+
+    @overload
+    @contextmanager
+    def model_sync(
+        self, model: Literal["gpt", "claude", "gemini"]
+    ) -> Generator[Union[GPT, Claude, Gemini], Any, None]: ...
 
     @contextmanager
-    def model_sync(self, model: Literal["gpt", "claude", "gemini"]):
+    def model_sync(self, model: Literal["gpt", "claude", "gemini"]) -> Generator[Union[GPT, Claude, Gemini], Any, None]:
         with self.get_page_sync() as page:
             if model == "gpt":
                 yield GPT(self.config, page)
