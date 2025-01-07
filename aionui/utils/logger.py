@@ -1,9 +1,6 @@
 from logging import getLogger
-from pathlib import Path
 import logging
 import sys
-from logging.handlers import RotatingFileHandler
-from datetime import datetime
 import traceback
 from types import TracebackType
 from typing import Mapping, Optional
@@ -51,10 +48,7 @@ class ColorFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt, datefmt="%Y-%m-%d %H:%M:%S")
         return formatter.format(record)
 
-    def formatException(
-        self,
-        ei: tuple[type[BaseException], BaseException, TracebackType | None] | tuple[None, None, None],
-    ) -> str:
+    def formatException(self) -> str:
         return ""
 
 

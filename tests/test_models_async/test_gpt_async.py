@@ -2,20 +2,17 @@ import pytest
 import json
 import re
 from pathlib import Path
-from playwright.async_api import expect, Playwright
+from playwright.async_api import expect
 import pytest
 from aionui.models import GPTAsync
-from aionui.enums import ExpectedResult
-from aionui.config import Config
-from playwright.async_api import async_playwright
 import pytest_asyncio
-from aionui import AiOnUi, AiModel
+from aionui import AiOnUi
 
 
 @pytest_asyncio.fixture(scope="class", loop_scope="class")
 async def gpt_async(config_file: str):
     aionui = AiOnUi(config_file)
-    async with aionui.model_async(AiModel.GPT) as model:
+    async with aionui.model_async("gpt") as model:
         yield model
 
 
@@ -68,7 +65,7 @@ class TestGPTAsync:
     async def test_chat_code(self, gpt_async: GPTAsync):
         result = await gpt_async.chat(
             'Trả lời lại chính xác json sau, không thêm bất kỳ thông tin nào khác: `{"message": "Xin chào"}`',
-            ExpectedResult.Code,
+            "code",
         )
         dict_result = json.loads(result)
         assert dict_result == {"message": "Xin chào"}

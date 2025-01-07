@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 import time
+from typing import Literal
 
 from aionui.exceptions.bot_detected_exception import BotDetectedException
-from ..enums import ExpectedResult
 from playwright.sync_api import Locator, Page
 from ..config.config import Config
 import os
@@ -45,11 +45,14 @@ class BaseModel(ABC):
         input_field = self.get_input_field()
         input_field.fill(message)
 
-    def text_as_file(self, text: str):
+    def text_as_file(self, text: str, file_name: str = "attachment.txt"):
         """
         Converts text to a file and attaches it.
+
+        Args:
+            text (str): The text content to write to the file
+            file_name (str, optional): The name of the file to create. Defaults to "attachment.txt"
         """
-        file_name = f"attchment.txt"
         path = os.path.abspath(file_name)
 
         if os.path.exists(path):
@@ -101,12 +104,19 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def chat(self, message: str, expected_result: ExpectedResult = ExpectedResult.Text) -> str:
+    def chat(self, message: str, expected_result: Literal["text", "image", "code", "json"] = "text") -> str:
         """Sends a message to the AI model and returns the response.
-
         Args:
             message (str): The message to send to the AI model.
-            expected_result (ExpectedResult, optional): The expected result of the response. Defaults to ExpectedResult.Text.
+            expected_result (Literal["text", "image", "code", "json"], optional): The expected result type.
+                Can be "text", "image", "code", or "json". Defaults to "text".
+
+        Returns:
+            str: The response from the AI model. For "text" returns plain text, for "code"/"json" returns
+                the code/JSON string, for "image" returns the image URL.
+
+        Raises:
+            BotDetectedException: If bot detection (e.g. Cloudflare) blocks the request.
         """
         pass
 

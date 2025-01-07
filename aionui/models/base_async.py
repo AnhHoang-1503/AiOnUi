@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
+from typing import Literal
 
 from playwright.async_api import Locator, Page
 from ..config.config import Config
-from ..enums import ExpectedResult
 from ..exceptions import BotDetectedException
 import os
 import codecs
@@ -44,11 +44,14 @@ class BaseAsyncModel(ABC):
         input_field = await self.get_input_field()
         await input_field.fill(message)
 
-    async def text_as_file(self, text: str):
+    async def text_as_file(self, text: str, file_name: str = "attachment.txt"):
         """
         Converts text to a file and attaches it asynchronously.
+
+        Args:
+            text (str): The text content to write to the file
+            file_name (str, optional): The name of the file to create. Defaults to "attachment.txt"
         """
-        file_name = f"attachment.txt"
         path = os.path.abspath(file_name)
 
         if os.path.exists(path):
@@ -99,14 +102,24 @@ class BaseAsyncModel(ABC):
         pass
 
     @abstractmethod
-    async def chat(self, message: str, expected_result: ExpectedResult = ExpectedResult.Text) -> str:
+    async def chat(self, message: str, expected_result: Literal["text", "image", "code", "json"] = "text") -> str:
         """
         Sends a message to the AI model and returns the response asynchronously.
 
         Args:
             message (str): The message to send to the AI model.
-            expected_result (ExpectedResult, optional): The expected result type.
-                Defaults to ExpectedResult.Text.
+            expected_result (Literal["text", "image", "code", "json"], optional): The expected result type.
+                Can be "text", "image", "code", or "json". Defaults to "text".
+
+        Returns:
+            str: The response from the AI model. The format depends on expected_result:
+                - "text": Plain text response
+                - "image": URL to generated image
+                - "code": Code block response
+                - "json": JSON response as string
+
+        Raises:
+            BotDetectedException: If bot detection (e.g. Cloudflare) blocks the request.
         """
         pass
 
@@ -131,5 +144,8 @@ class BaseAsyncModel(ABC):
     async def handle_on_error(self, error: Exception):
         """
         Handles when chat fails asynchronously.
+
+        Args:
+            error (Exception): The exception that was raised during chat.
         """
         pass

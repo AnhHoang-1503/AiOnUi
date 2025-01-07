@@ -1,9 +1,7 @@
+from typing import Literal
 import pytest
 import os
-from asyncio import Future
-import pytest_asyncio
-from aionui import AiOnUi, AiModel, ExpectedResult
-from aionui.exceptions import BotDetectedException
+from aionui import AiOnUi
 from aionui.models import GPT, Claude, Gemini, GPTAsync, ClaudeAsync, GeminiAsync
 from playwright.sync_api import Page, Browser, BrowserContext, Playwright
 from playwright.async_api import (
@@ -89,41 +87,41 @@ class TestAiOnUiConfig:
 
 
 class TestAiOnUiSync:
-    @pytest.mark.parametrize("model_type", [AiModel.GPT])  # TODO: Add other models
-    def test_sync_model(self, mock_page: Mock, model_type: AiModel):
+    @pytest.mark.parametrize("model_type", ["gpt"])  # TODO: Add other models
+    def test_sync_model(self, mock_page: Mock, model_type: Literal["gpt", "claude", "gemini"]):
         aionui = AiOnUi(page=mock_page)
         with aionui.model_sync(model_type) as model:
             assert model is not None
             assert model.page == mock_page
-            if model_type == AiModel.GPT:
+            if model_type == "gpt":
                 assert isinstance(model, GPT)
-            elif model_type == AiModel.Claude:
+            elif model_type == "claude":
                 assert isinstance(model, Claude)
-            elif model_type == AiModel.Gemini:
+            elif model_type == "gemini":
                 assert isinstance(model, Gemini)
 
     def test_clean_up_page(self, mock_page):
         aionui = AiOnUi(page=mock_page)
-        with aionui.model_sync(AiModel.GPT) as model:
+        with aionui.model_sync("gpt") as model:
             assert model.page == mock_page
 
     def test_clean_up_context(self, mock_context, mock_page):
         aionui = AiOnUi(context=mock_context)
-        with aionui.model_sync(AiModel.GPT) as model:
+        with aionui.model_sync("gpt") as model:
             assert model.page == mock_page
         assert mock_context.new_page.call_count == 1
         assert mock_page.close.call_count == 1
 
     def test_clean_up_browser(self, mock_browser, mock_page, mock_context):
         aionui = AiOnUi(browser=mock_browser)
-        with aionui.model_sync(AiModel.GPT) as model:
+        with aionui.model_sync("gpt") as model:
             assert model.page == mock_page
         assert mock_context.new_page.call_count == 1
         assert mock_page.close.call_count == 1
 
     def test_clean_up_playwright(self, mock_playwright, mock_page, mock_context, mock_browser):
         aionui = AiOnUi(playwright=mock_playwright)
-        with aionui.model_sync(AiModel.GPT) as model:
+        with aionui.model_sync("gpt") as model:
             assert model.page == mock_page
         assert mock_playwright.chromium.connect_over_cdp.call_count == 1
         assert mock_page.close.call_count == 1
@@ -140,7 +138,7 @@ class TestAiOnUiSync:
             mock_sync_playwright.return_value.__enter__.return_value = mock_playwright
 
             aionui = AiOnUi()
-            with aionui.model_sync(AiModel.GPT) as model:
+            with aionui.model_sync("gpt") as model:
                 assert model.page == mock_page
 
             assert mock_popen.call_count == 1
@@ -150,30 +148,30 @@ class TestAiOnUiSync:
 
 
 class TestAiOnUiAsync:
-    @pytest.mark.parametrize("model_type", [AiModel.GPT])
+    @pytest.mark.parametrize("model_type", ["gpt"])
     @pytest.mark.asyncio(loop_scope="class")
-    async def test_async_model(self, mock_page_async: AsyncMock, model_type: AiModel):
+    async def test_async_model(self, mock_page_async: AsyncMock, model_type: Literal["gpt", "claude", "gemini"]):
         aionui = AiOnUi(page=mock_page_async)
         async with aionui.model_async(model_type) as model:
             assert model is not None
             assert model.page == mock_page_async
-            if model_type == AiModel.GPT:
+            if model_type == "gpt":
                 assert isinstance(model, GPTAsync)
-            elif model_type == AiModel.Claude:
+            elif model_type == "claude":
                 assert isinstance(model, ClaudeAsync)
-            elif model_type == AiModel.Gemini:
+            elif model_type == "gemini":
                 assert isinstance(model, GeminiAsync)
 
     @pytest.mark.asyncio(loop_scope="class")
     async def test_clean_up_page(self, mock_page_async):
         aionui = AiOnUi(page=mock_page_async)
-        async with aionui.model_async(AiModel.GPT) as model:
+        async with aionui.model_async("gpt") as model:
             assert model.page == mock_page_async
 
     @pytest.mark.asyncio(loop_scope="class")
     async def test_clean_up_context(self, mock_context_async, mock_page_async):
         aionui = AiOnUi(context=mock_context_async)
-        async with aionui.model_async(AiModel.GPT) as model:
+        async with aionui.model_async("gpt") as model:
             assert model.page == mock_page_async
         assert mock_context_async.new_page.await_count == 1
         assert mock_page_async.close.await_count == 1
@@ -181,7 +179,7 @@ class TestAiOnUiAsync:
     @pytest.mark.asyncio(loop_scope="class")
     async def test_clean_up_browser(self, mock_browser_async, mock_page_async, mock_context_async):
         aionui = AiOnUi(browser=mock_browser_async)
-        async with aionui.model_async(AiModel.GPT) as model:
+        async with aionui.model_async("gpt") as model:
             assert model.page == mock_page_async
         assert mock_context_async.new_page.await_count == 1
         assert mock_page_async.close.await_count == 1
@@ -191,7 +189,7 @@ class TestAiOnUiAsync:
         self, mock_playwright_async, mock_page_async, mock_context_async, mock_browser_async
     ):
         aionui = AiOnUi(playwright=mock_playwright_async)
-        async with aionui.model_async(AiModel.GPT) as model:
+        async with aionui.model_async("gpt") as model:
             assert model.page == mock_page_async
         assert mock_playwright_async.chromium.connect_over_cdp.await_count == 1
         assert mock_page_async.close.await_count == 1
@@ -211,7 +209,7 @@ class TestAiOnUiAsync:
             mock_async_playwright.return_value.__aenter__.return_value = mock_playwright_async
 
             aionui = AiOnUi()
-            async with aionui.model_async(AiModel.GPT) as model:
+            async with aionui.model_async("gpt") as model:
                 assert model.page == mock_page_async
 
             assert mock_popen.call_count == 1

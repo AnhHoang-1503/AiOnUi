@@ -1,4 +1,5 @@
 import asyncio
+from typing import Literal
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -8,7 +9,7 @@ from playwright.async_api import Locator, Page
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from ..config import Config
-from ..enums import ExpectedResult, Platform, KeyboardCommand, GPTTool
+from ..enums import Platform, KeyboardCommand
 from ..utils.logger import get_logger
 from ..utils.common import clean_text
 from .base_async import BaseAsyncModel
@@ -70,14 +71,17 @@ class GPTAsync(BaseAsyncModel):
 
     @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     async def chat(
-        self, message: str, expected_result: ExpectedResult = ExpectedResult.Text, tools: list[GPTTool] = []
+        self,
+        message: str,
+        expected_result: Literal["text", "image", "code", "json"] = "text",
+        tools: list[Literal["search_the_web"]] = [],
     ) -> str:
         if "gpt" not in self.page.url.lower():
             await self.page.goto(self.url)
             await self.page.wait_for_load_state("networkidle")
             await asyncio.sleep(2)
 
-        if expected_result == ExpectedResult.Code:
+        if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."
 
@@ -91,9 +95,9 @@ class GPTAsync(BaseAsyncModel):
 
         await self.wait_for_response()
 
-        if expected_result == ExpectedResult.Image:
+        if expected_result == "image":
             return await self.get_image_response()
-        elif expected_result == ExpectedResult.Code:
+        elif expected_result == "code" or expected_result == "json":
             return await self.get_code_block_response()
         else:
             return await self.get_text_response()
@@ -131,7 +135,7 @@ class GPTAsync(BaseAsyncModel):
         if await last_article.locator(".sr-only").last.text_content() == "You said:":
             return await self.wait_for_response()
 
-    async def handle_on_error(self, error: Exception):
+    async def handle_on_error(self):
         await self.page.reload()
         time_element = self.page.locator(r"text=/[0-9]{1,2}:[0-9]{2}\s(?:AM|PM)/")
 
@@ -157,9 +161,9 @@ class GPTAsync(BaseAsyncModel):
 
         return MACOS[command] if self.config.platform == Platform.MACOS else WINDOWS[command]
 
-    async def activate_tools(self, tools: list[GPTTool]):
+    async def activate_tools(self, tools: list[Literal["search_the_web"]]):
         """Activates the tools for the GPT model."""
-        if GPTTool.SearchTheWeb in tools:
+        if "search_the_web" in tools:
             search_btn = self.page.locator('[aria-label="Search the web"][aria-pressed="false"]')
             if await search_btn.count() > 0:
                 await search_btn.first.click()

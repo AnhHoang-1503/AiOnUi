@@ -1,18 +1,16 @@
-import os
 import re
 import time
 from datetime import datetime, timedelta
-from enum import Enum
-from typing import overload, override
+from typing import Literal, override
 from pathlib import Path
 
 import pyperclip
-from playwright.sync_api import Locator, Page, Request, Response, Route
+from playwright.sync_api import Locator, Page
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryCallState
 
 from ..config import Config
 from .base import BaseModel
-from ..enums import ExpectedResult, Platform, KeyboardCommand, GPTTool
+from ..enums import Platform, KeyboardCommand
 from ..utils.logger import get_logger
 from ..utils.common import clean_text
 
@@ -88,13 +86,18 @@ class GPT(BaseModel):
 
     @override
     @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15), before_sleep=handle_reload)
-    def chat(self, message: str, expected_result: ExpectedResult = ExpectedResult.Text, tools: list[GPTTool] = []):
+    def chat(
+        self,
+        message: str,
+        expected_result: Literal["text", "image", "code", "json"] = "text",
+        tools: list[Literal["search_the_web"]] = [],
+    ):
         if "gpt" not in self.page.url.lower():
             self.page.goto(self.url)
             self.page.wait_for_load_state("networkidle")
             time.sleep(2)
 
-        if expected_result == ExpectedResult.Code:
+        if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."
         self.get_input_field()
@@ -103,9 +106,9 @@ class GPT(BaseModel):
         self.activate_tools(tools)
         self.get_submit_button().click()
         self.wait_for_response()
-        if expected_result == ExpectedResult.Image:
+        if expected_result == "image":
             return self.get_image_response()
-        elif expected_result == ExpectedResult.Code:
+        elif expected_result == "code" or expected_result == "json":
             return self.get_code_block_response()
         else:
             return self.get_text_response()
@@ -141,7 +144,7 @@ class GPT(BaseModel):
             return self.wait_for_response()
 
     @override
-    def handle_on_error(self, error: Exception):
+    def handle_on_error(self):
         self.page.reload()
         if self.page.locator(r"text=/[0-9]{1,2}:[0-9]{2}\s(?:AM|PM)/").count() > 0:
             text = self.page.locator(r"text=/[0-9]{1,2}:[0-9]{2}\s(?:AM|PM)/").inner_text()
@@ -165,9 +168,9 @@ class GPT(BaseModel):
 
         return MACOS[command] if self.config.platform == Platform.MACOS else WINDOWS[command]
 
-    def activate_tools(self, tools: list[GPTTool]):
+    def activate_tools(self, tools: list[Literal["search_the_web"]]):
         """Activates the tools for the GPT model."""
-        if GPTTool.SearchTheWeb in tools:
+        if "search_the_web" in tools:
             if self.page.locator('[aria-label="Search the web"][aria-pressed="false"]').count() > 0:
                 self.page.locator('[aria-label="Search the web"][aria-pressed="false"]').first.click()
 

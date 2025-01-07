@@ -20,7 +20,6 @@ from playwright.sync_api import (
 )
 from .config import Config
 from .utils.logger import get_logger
-from .enums import AiModel
 from .models import GPT, Claude, Gemini, GPTAsync, ClaudeAsync, GeminiAsync
 
 nest_asyncio.apply()
@@ -114,22 +113,24 @@ class AiOnUi:
 
     # region Async Api
     @overload
-    async def model_async(self, model: Literal[AiModel.GPT]) -> AsyncGenerator[GPTAsync, None]: ...
+    async def model_async(self, model: Literal["gpt"]) -> AsyncGenerator[GPTAsync, None]: ...
 
     @overload
-    async def model_async(self, model: Literal[AiModel.Claude]) -> AsyncGenerator[ClaudeAsync, None]: ...
+    async def model_async(self, model: Literal["claude"]) -> AsyncGenerator[ClaudeAsync, None]: ...
 
     @overload
-    async def model_async(self, model: Literal[AiModel.Gemini]) -> AsyncGenerator[GeminiAsync, None]: ...
+    async def model_async(self, model: Literal["gemini"]) -> AsyncGenerator[GeminiAsync, None]: ...
 
     @asynccontextmanager
-    async def model_async(self, model: AiModel) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync], None]:
+    async def model_async(
+        self, model: Literal["gpt", "claude", "gemini"]
+    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync], None]:
         async with self.get_page_async() as page:
-            if model == AiModel.GPT:
+            if model == "gpt":
                 yield GPTAsync(self.config, page)
-            elif model == AiModel.Claude:
+            elif model == "claude":
                 yield ClaudeAsync(self.config, page)
-            elif model == AiModel.Gemini:
+            elif model == "gemini":
                 yield GeminiAsync(self.config, page)
 
     @asynccontextmanager
@@ -183,22 +184,24 @@ class AiOnUi:
 
     # region Sync Api
     @overload
-    def model_sync(self, model: Literal[AiModel.GPT]) -> Generator[GPT, None, None]: ...
+    def model_sync(self, model: Literal["gpt"]) -> Generator[GPT, None, None]: ...
 
     @overload
-    def model_sync(self, model: Literal[AiModel.Claude]) -> Generator[Claude, None, None]: ...
+    def model_sync(self, model: Literal["claude"]) -> Generator[Claude, None, None]: ...
 
     @overload
-    def model_sync(self, model: Literal[AiModel.Gemini]) -> Generator[Gemini, None, None]: ...
+    def model_sync(self, model: Literal["gemini"]) -> Generator[Gemini, None, None]: ...
 
     @contextmanager
-    def model_sync(self, model: AiModel) -> Generator[Union[GPT, Claude, Gemini], None, None]:
+    def model_sync(
+        self, model: Literal["gpt", "claude", "gemini"]
+    ) -> Generator[Union[GPT, Claude, Gemini], None, None]:
         with self.get_page_sync() as page:
-            if model == AiModel.GPT:
+            if model == "gpt":
                 yield GPT(self.config, page)
-            elif model == AiModel.Claude:
+            elif model == "claude":
                 yield Claude(self.config, page)
-            elif model == AiModel.Gemini:
+            elif model == "gemini":
                 yield Gemini(self.config, page)
 
     @contextmanager

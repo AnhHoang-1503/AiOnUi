@@ -1,6 +1,6 @@
-from aionui import AiOnUi, AiModel, ExpectedResult
+from aionui import AiOnUi
 
 aionui = AiOnUi(config_path="config.yaml")
 
-with aionui.model_sync(AiModel.GPT) as model:
+with aionui.model_sync("gpt") as model:
     model.chat("Hello, world!")

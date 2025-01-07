@@ -2,20 +2,16 @@ import pytest
 import json
 import re
 from pathlib import Path
-import time
-from playwright.sync_api._generated import Playwright
 import pytest
-from aionui import AiOnUi, AiModel, GPTTool
+from aionui import AiOnUi
 from aionui.models import GPT
-from aionui.enums import ExpectedResult
-from aionui.config import Config
 from playwright.sync_api import expect
 
 
 @pytest.fixture(scope="class")
 def gpt(config_file):
     aionui = AiOnUi(config_file)
-    with aionui.model_sync(AiModel.GPT) as model:
+    with aionui.model_sync("gpt") as model:
         yield model
 
 
@@ -56,7 +52,7 @@ class TestGPT:
     def test_chat_code(self, gpt: GPT):
         result = gpt.chat(
             'Trả lời lại chính xác json sau, không thêm bất kỳ thông tin nào khác: `{"message": "Xin chào"}`',
-            ExpectedResult.Code,
+            "code",
         )
         dict_result = json.loads(result)
         assert dict_result == {"message": "Xin chào"}

@@ -1,9 +1,6 @@
 from _pytest._py.path import LocalPath
 import pytest
-import pytest_asyncio
 import codecs
-import asyncio
-from playwright.async_api import async_playwright
 
 
 @pytest.fixture(scope="session")
