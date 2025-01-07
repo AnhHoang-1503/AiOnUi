@@ -1,10 +1,11 @@
+import pytest
 import json
 import re
 from pathlib import Path
 import time
 from playwright.sync_api._generated import Playwright
 import pytest
-from aionui import AiOnUI, AiModel, GPTTool
+from aionui import AiOnUi, AiModel, GPTTool
 from aionui.models import GPT
 from aionui.enums import ExpectedResult
 from aionui.config import Config
@@ -13,8 +14,9 @@ from playwright.sync_api import expect
 
 @pytest.fixture(scope="class")
 def gpt(config_file):
-    with AiOnUI(AiModel.GPT, config_file) as ai:
-        yield ai.model
+    aionui = AiOnUi(config_file)
+    with aionui.model_sync(AiModel.GPT) as model:
+        yield model
 
 
 class TestGPT:

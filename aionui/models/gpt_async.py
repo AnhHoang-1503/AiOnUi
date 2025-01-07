@@ -73,8 +73,8 @@ class GPTAsync(BaseAsyncModel):
         self, message: str, expected_result: ExpectedResult = ExpectedResult.Text, tools: list[GPTTool] = []
     ) -> str:
         if "gpt" not in self.page.url.lower():
-            self.page.goto(self.url)
-            self.page.wait_for_load_state("networkidle")
+            await self.page.goto(self.url)
+            await self.page.wait_for_load_state("networkidle")
             await asyncio.sleep(2)
 
         if expected_result == ExpectedResult.Code:

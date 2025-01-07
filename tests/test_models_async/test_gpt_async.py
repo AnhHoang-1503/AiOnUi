@@ -1,3 +1,4 @@
+import pytest
 import json
 import re
 from pathlib import Path
@@ -8,13 +9,14 @@ from aionui.enums import ExpectedResult
 from aionui.config import Config
 from playwright.async_api import async_playwright
 import pytest_asyncio
-from aionui import AiOnUiAsync, AiModel
+from aionui import AiOnUi, AiModel
 
 
 @pytest_asyncio.fixture(scope="class", loop_scope="class")
 async def gpt_async(config_file: str):
-    async with AiOnUiAsync(AiModel.GPT, config_file) as ai:
-        yield ai.model
+    aionui = AiOnUi(config_file)
+    async with aionui.model_async(AiModel.GPT) as model:
+        yield model
 
 
 class TestGPTAsync:
