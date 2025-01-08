@@ -128,17 +128,20 @@ class GPT(BaseModel):
             logger.info("Continuing generation...")
             return self.wait_for_response()
 
-        if self.page.locator('article[data-testid^="conversation-turn"]').count() <= 0:
+        if self.page.locator("article").count() <= 0:
             return self.wait_for_response()
 
         if self.page.locator('[data-testid="copy-turn-action-button"]').count() <= 0:
             return self.wait_for_response()
 
-        last_article = self.page.locator('article[data-testid^="conversation-turn"]')
+        last_article = self.page.locator("article").last
         if last_article.locator(".sr-only").last.text_content() == "You said:":
             return self.wait_for_response()
 
         if last_article.locator('[data-testid="copy-turn-action-button"]').count() <= 0:
+            return self.wait_for_response()
+
+        if not last_article.locator('[data-testid="copy-turn-action-button"]').last.is_visible():
             return self.wait_for_response()
 
     @override

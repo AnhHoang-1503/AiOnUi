@@ -55,11 +55,7 @@ class GPTAsync(BaseAsyncModel):
         return result
 
     async def get_image_response(self) -> str:
-        src = await (
-            self.page.locator('article[data-testid^="conversation-turn"]')
-            .last.locator("img")
-            .first.get_attribute("src")
-        )
+        src = await self.page.locator("article").last.locator("img").first.get_attribute("src")
         if not src:
             raise Exception("Image generation failed")
         return src
@@ -116,7 +112,7 @@ class GPTAsync(BaseAsyncModel):
             logger.info("Continuing generation...")
             return await self.wait_for_response()
 
-        articles = self.page.locator('article[data-testid^="conversation-turn"]')
+        articles = self.page.locator("article").last
         if await articles.count() <= 0:
             return await self.wait_for_response()
 
