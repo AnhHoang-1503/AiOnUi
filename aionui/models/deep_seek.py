@@ -1,3 +1,4 @@
+import json
 import time
 from pathlib import Path
 from typing import Literal, override
@@ -63,6 +64,7 @@ class DeepSeek(BaseModel):
         self,
         message: str,
         expected_result: Literal["text", "image", "code", "json"] = "text",
+        tools: list[Literal["search", "deep_think"]] = [],
     ) -> str:
         if "deepseek" not in self.page.url.lower():
             self.page.goto(self.url)
@@ -72,6 +74,7 @@ class DeepSeek(BaseModel):
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."
         self.fill_message(message)
+        self.activate_tools(tools)
         self.get_submit_button().click()
         self.wait_for_response()
         if expected_result == "code" or expected_result == "json":
@@ -121,3 +124,28 @@ class DeepSeek(BaseModel):
             input_field.type(message)
             input_field.press("Shift+Enter")
         self.page.wait_for_timeout(3000)
+
+    def activate_tools(self, tools: list[Literal["search", "deep_think"]]):
+        """Activates the tools for the GPT model."""
+        if "search" in tools:
+            need_click = False
+            try:
+                search_enabled = self.page.evaluate("localStorage.get('searchEnabled')")
+                if search_enabled is None or json.loads(search_enabled)["value"] == False:
+                    need_click = True
+            except Exception as e:
+                need_click = True
+
+            if need_click and self.page.locator(".ad0c98fd").locator("text=Search").count() > 0:
+                self.page.locator(".ad0c98fd").locator("text=Search").first.click()
+        if "deep_think" in tools:
+            need_click = False
+            try:
+                deep_think_enabled = self.page.evaluate("localStorage.get('deepThinkEnabled')")
+                if deep_think_enabled is None or json.loads(deep_think_enabled)["value"] == False:
+                    need_click = True
+            except Exception as e:
+                need_click = True
+
+            if need_click and self.page.locator(".ad0c98fd").locator("text=DeepThink").count() > 0:
+                self.page.locator(".ad0c98fd").locator("text=DeepThink").first.click()

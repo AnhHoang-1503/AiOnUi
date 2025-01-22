@@ -1,4 +1,4 @@
-import time
+import json
 from pathlib import Path
 from typing import Literal, override
 from playwright.sync_api import Locator
@@ -63,6 +63,7 @@ class DeepSeekAsync(BaseAsyncModel):
         self,
         message: str,
         expected_result: Literal["text", "image", "code", "json"] = "text",
+        tools: list[Literal["search", "deep_think"]] = [],
     ) -> str:
         if "deepseek" not in self.page.url.lower():
             await self.page.goto(self.url)
@@ -71,7 +72,9 @@ class DeepSeekAsync(BaseAsyncModel):
         if expected_result == "code" or expected_result == "json":
             if "return in code block" not in message.lower():
                 message += "\nReturn in code block."
+
         await self.fill_message(message)
+        await self.activate_tools(tools)
         submit_button = await self.get_submit_button()
         await submit_button.click()
 
@@ -126,3 +129,28 @@ class DeepSeekAsync(BaseAsyncModel):
             await input_field.type(message)
             await input_field.press("Shift+Enter")
         await self.page.wait_for_timeout(3000)
+
+    async def activate_tools(self, tools: list[Literal["search", "deep_think"]]):
+        """Activates the tools for the GPT model."""
+        if "search" in tools:
+            need_click = False
+            try:
+                search_enabled = await self.page.evaluate("localStorage.get('searchEnabled')")
+                if search_enabled is None or json.loads(search_enabled)["value"] == False:
+                    need_click = True
+            except Exception as e:
+                need_click = True
+
+            if need_click and await self.page.locator(".ad0c98fd").locator("text=Search").count() > 0:
+                await self.page.locator(".ad0c98fd").locator("text=Search").first.click()
+        if "deep_think" in tools:
+            need_click = False
+            try:
+                deep_think_enabled = await self.page.evaluate("localStorage.get('deepThinkEnabled')")
+                if deep_think_enabled is None or json.loads(deep_think_enabled)["value"] == False:
+                    need_click = True
+            except Exception as e:
+                need_click = True
+
+            if need_click and await self.page.locator(".ad0c98fd").locator("text=DeepThink").count() > 0:
+                await self.page.locator(".ad0c98fd").locator("text=DeepThink").first.click()
