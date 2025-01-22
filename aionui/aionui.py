@@ -20,8 +20,8 @@ from playwright.sync_api import (
 )
 from .config import Config
 from .utils.logger import get_logger
-from .models import GPT, Claude, Gemini
-from .models_async import GPTAsync, ClaudeAsync, GeminiAsync
+from .models import GPT, Claude, Gemini, DeepSeek
+from .models_async import GPTAsync, ClaudeAsync, GeminiAsync, DeepSeekAsync
 
 nest_asyncio.apply()
 default_logger = get_logger()
@@ -127,14 +127,18 @@ class AiOnUi:
 
     @overload
     @asynccontextmanager
+    async def model_async(self, model: Literal["deep_seek_async"]) -> AsyncGenerator[DeepSeekAsync]: ...
+
+    @overload
+    @asynccontextmanager
     async def model_async(
-        self, model: Literal["gpt", "claude", "gemini"]
-    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync]]: ...
+        self, model: Literal["gpt", "claude", "gemini", "deep_seek_async"]
+    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync, DeepSeekAsync]]: ...
 
     @asynccontextmanager
     async def model_async(
-        self, model: Literal["gpt", "claude", "gemini"]
-    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync]]:
+        self, model: Literal["gpt", "claude", "gemini", "deep_seek_async"]
+    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync, DeepSeekAsync]]:
         async with self.get_page_async() as page:
             if model == "gpt":
                 yield GPTAsync(self.config, page)
@@ -142,6 +146,8 @@ class AiOnUi:
                 yield ClaudeAsync(self.config, page)
             elif model == "gemini":
                 yield GeminiAsync(self.config, page)
+            elif model == "deep_seek_async":
+                yield DeepSeekAsync(self.config, page)
 
     @asynccontextmanager
     async def get_page_async(self) -> AsyncGenerator[AsyncPage]:
@@ -207,7 +213,13 @@ class AiOnUi:
 
     @overload
     @contextmanager
-    def model_sync(self, model: Literal["gpt", "claude", "gemini"]) -> Generator[Union[GPT, Claude, Gemini]]: ...
+    def model_sync(self, model: Literal["deep_seek_sync"]) -> Generator[DeepSeek]: ...
+
+    @overload
+    @contextmanager
+    def model_sync(
+        self, model: Literal["gpt", "claude", "gemini", "deep_seek_sync"]
+    ) -> Generator[Union[GPT, Claude, Gemini, DeepSeek]]: ...
 
     @contextmanager
     def model_sync(self, model: Literal["gpt", "claude", "gemini"]) -> Generator[Union[GPT, Claude, Gemini]]:
@@ -218,6 +230,8 @@ class AiOnUi:
                 yield Claude(self.config, page)
             elif model == "gemini":
                 yield Gemini(self.config, page)
+            elif model == "deep_seek_sync":
+                yield DeepSeek(self.config, page)
 
     @contextmanager
     def get_page_sync(self):
