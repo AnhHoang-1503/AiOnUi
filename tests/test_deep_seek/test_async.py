@@ -11,7 +11,7 @@ import pytest_asyncio
 @pytest_asyncio.fixture(scope="class", loop_scope="class")
 async def deep_seek_async(config_file):
     aionui = AiOnUi(config_file)
-    async with aionui.model_async("deep_seek_async") as model:
+    async with aionui.model_async("deep_seek") as model:
         yield model
 
 

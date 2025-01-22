@@ -30,7 +30,7 @@ class DeepSeek(BaseModel):
         if self.page.locator(".f9bf7997.d7dc56a8.c05b5566").count() <= 0:
             raise ValueError("No response found")
 
-        response = self.page.locator(".f9bf7997.d7dc56a8.c05b5566").last.inner_text()
+        response = self.page.locator(".f9bf7997.d7dc56a8.c05b5566 .ds-markdown.ds-markdown--block").last.inner_text()
         if response == "":
             raise ValueError("No response found")
 
@@ -126,26 +126,30 @@ class DeepSeek(BaseModel):
         self.page.wait_for_timeout(3000)
 
     def activate_tools(self, tools: list[Literal["search", "deep_think"]]):
-        """Activates the tools for the GPT model."""
-        if "search" in tools:
-            need_click = False
-            try:
-                search_enabled = self.page.evaluate("localStorage.get('searchEnabled')")
-                if search_enabled is None or json.loads(search_enabled)["value"] == False:
-                    need_click = True
-            except Exception as e:
-                need_click = True
+        need_click_search = False
+        try:
+            search_enabled = self.page.evaluate("localStorage.getItem('searchEnabled')")
+            if "search" in tools and (search_enabled is None or json.loads(search_enabled)["value"] == False):
+                need_click_search = True
+            elif "search" not in tools and (json.loads(search_enabled)["value"] == True):
+                need_click_search = True
+        except Exception as e:
+            need_click_search = True
 
-            if need_click and self.page.locator(".ad0c98fd").locator("text=Search").count() > 0:
-                self.page.locator(".ad0c98fd").locator("text=Search").first.click()
-        if "deep_think" in tools:
-            need_click = False
-            try:
-                deep_think_enabled = self.page.evaluate("localStorage.get('deepThinkEnabled')")
-                if deep_think_enabled is None or json.loads(deep_think_enabled)["value"] == False:
-                    need_click = True
-            except Exception as e:
-                need_click = True
+        if need_click_search and self.page.locator(".ad0c98fd").locator("text=Search").count() > 0:
+            self.page.locator(".ad0c98fd").locator("text=Search").first.click()
 
-            if need_click and self.page.locator(".ad0c98fd").locator("text=DeepThink").count() > 0:
-                self.page.locator(".ad0c98fd").locator("text=DeepThink").first.click()
+        need_click_thinking = False
+        try:
+            deep_think_enabled = self.page.evaluate("localStorage.getItem('thinkingEnabled')")
+            if "deep_think" in tools and (
+                deep_think_enabled is None or json.loads(deep_think_enabled)["value"] == False
+            ):
+                need_click_thinking = True
+            elif "deep_think" not in tools and (json.loads(deep_think_enabled)["value"] == True):
+                need_click_thinking = True
+        except Exception as e:
+            need_click_thinking = True
+
+        if need_click_thinking and self.page.locator(".ad0c98fd").locator("text=DeepThink").count() > 0:
+            self.page.locator(".ad0c98fd").locator("text=DeepThink").first.click()

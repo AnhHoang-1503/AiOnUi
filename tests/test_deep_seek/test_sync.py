@@ -10,7 +10,7 @@ from pathlib import Path
 @pytest.fixture(scope="class")
 def deep_seek(config_file):
     aionui = AiOnUi(config_file)
-    with aionui.model_sync("deep_seek_sync") as model:
+    with aionui.model_sync("deep_seek") as model:
         yield model
 
 
