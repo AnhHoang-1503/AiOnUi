@@ -115,30 +115,30 @@ class AiOnUi:
     # region Async Api
     @overload
     @asynccontextmanager
-    async def model_async(self, model: Literal["gpt"]) -> AsyncGenerator[GPTAsync]: ...
+    async def model_async(self, model: Literal["gpt"]) -> AsyncGenerator[GPTAsync, None]: ...
 
     @overload
     @asynccontextmanager
-    async def model_async(self, model: Literal["claude"]) -> AsyncGenerator[ClaudeAsync]: ...
+    async def model_async(self, model: Literal["claude"]) -> AsyncGenerator[ClaudeAsync, None]: ...
 
     @overload
     @asynccontextmanager
-    async def model_async(self, model: Literal["gemini"]) -> AsyncGenerator[GeminiAsync]: ...
+    async def model_async(self, model: Literal["gemini"]) -> AsyncGenerator[GeminiAsync, None]: ...
 
     @overload
     @asynccontextmanager
-    async def model_async(self, model: Literal["deep_seek"]) -> AsyncGenerator[DeepSeekAsync]: ...
+    async def model_async(self, model: Literal["deep_seek"]) -> AsyncGenerator[DeepSeekAsync, None]: ...
 
     @overload
     @asynccontextmanager
     async def model_async(
         self, model: Literal["gpt", "claude", "gemini", "deep_seek"]
-    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync, DeepSeekAsync]]: ...
+    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync, DeepSeekAsync], None]: ...
 
     @asynccontextmanager
     async def model_async(
         self, model: Literal["gpt", "claude", "gemini", "deep_seek"]
-    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync, DeepSeekAsync]]:
+    ) -> AsyncGenerator[Union[GPTAsync, ClaudeAsync, GeminiAsync, DeepSeekAsync], None]:
         async with self.get_page_async() as page:
             if model == "gpt":
                 yield GPTAsync(self.config, page)
@@ -150,7 +150,7 @@ class AiOnUi:
                 yield DeepSeekAsync(self.config, page)
 
     @asynccontextmanager
-    async def get_page_async(self) -> AsyncGenerator[AsyncPage]:
+    async def get_page_async(self) -> AsyncGenerator[AsyncPage, None]:
         if self._page_async is not None:
             yield self._page_async
         elif self._context_async is not None:
@@ -201,30 +201,30 @@ class AiOnUi:
     # region Sync Api
     @overload
     @contextmanager
-    def model_sync(self, model: Literal["gpt"]) -> Generator[GPT]: ...
+    def model_sync(self, model: Literal["gpt"]) -> Generator[GPT, None, None]: ...
 
     @overload
     @contextmanager
-    def model_sync(self, model: Literal["claude"]) -> Generator[Claude]: ...
+    def model_sync(self, model: Literal["claude"]) -> Generator[Claude, None, None]: ...
 
     @overload
     @contextmanager
-    def model_sync(self, model: Literal["gemini"]) -> Generator[Gemini]: ...
+    def model_sync(self, model: Literal["gemini"]) -> Generator[Gemini, None, None]: ...
 
     @overload
     @contextmanager
-    def model_sync(self, model: Literal["deep_seek"]) -> Generator[DeepSeek]: ...
+    def model_sync(self, model: Literal["deep_seek"]) -> Generator[DeepSeek, None, None]: ...
 
     @overload
     @contextmanager
     def model_sync(
         self, model: Literal["gpt", "claude", "gemini", "deep_seek"]
-    ) -> Generator[Union[GPT, Claude, Gemini, DeepSeek]]: ...
+    ) -> Generator[Union[GPT, Claude, Gemini, DeepSeek], None, None]: ...
 
     @contextmanager
     def model_sync(
         self, model: Literal["gpt", "claude", "gemini", "deep_seek"]
-    ) -> Generator[Union[GPT, Claude, Gemini, DeepSeek]]:
+    ) -> Generator[Union[GPT, Claude, Gemini, DeepSeek], None, None]:
         with self.get_page_sync() as page:
             if model == "gpt":
                 yield GPT(self.config, page)
@@ -236,7 +236,7 @@ class AiOnUi:
                 yield DeepSeek(self.config, page)
 
     @contextmanager
-    def get_page_sync(self):
+    def get_page_sync(self) -> Generator[SyncPage, None, None]:
         if self._page_sync is not None:
             yield self._page_sync
         elif self._context_sync is not None:
