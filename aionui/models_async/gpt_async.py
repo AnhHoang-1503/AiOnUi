@@ -49,6 +49,7 @@ class GPTAsync(BaseAsyncModel):
     async def get_code_block_response(self) -> str:
         pyperclip.copy("")
         await self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.CopyLastCode))
+        await self.page.wait_for_timeout(200)
         result = pyperclip.paste()
         if result == "":
             raise ValueError("No response found")
