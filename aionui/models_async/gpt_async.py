@@ -97,7 +97,7 @@ class GPTAsync(BaseAsyncModel):
     async def attach_file(self, file_path: str):
         path = Path(file_path)
         file_name = path.name
-        file_input = self.page.locator('input[type="file"]')
+        file_input = self.page.locator('input[type="file"]').first
         await file_input.set_input_files(file_path)
         await self.page.wait_for_timeout(3000)
 

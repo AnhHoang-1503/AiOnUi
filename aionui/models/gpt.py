@@ -114,7 +114,7 @@ class GPT(BaseModel):
     def attach_file(self, file_path: str):
         path = Path(file_path)
         file_name = path.name
-        file_input = self.page.locator('input[type="file"]')
+        file_input = self.page.locator('input[type="file"]').first
         file_input.set_input_files(file_path)
         time.sleep(3)
         if Path(file_input.input_value()).name != file_name:
