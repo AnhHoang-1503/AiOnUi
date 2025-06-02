@@ -39,7 +39,10 @@ class GPTAsync(BaseAsyncModel):
     @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     async def get_text_response(self) -> str:
         pyperclip.copy("")
-        await self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.CopyLastArticle))
+        # await self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.CopyLastArticle))
+        await self.page.wait_for_selector('[data-testid="copy-turn-action-button"]')
+        await self.page.locator('[data-testid="copy-turn-action-button"]').click()
+
         result = pyperclip.paste()
         if result == "":
             raise ValueError("No response found")

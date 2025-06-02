@@ -53,7 +53,9 @@ class GPT(BaseModel):
     @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=4, max=15))
     def get_text_response(self):
         pyperclip.copy("")
-        self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.CopyLastArticle))
+        # self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.CopyLastArticle))
+        self.page.wait_for_selector('[data-testid="copy-turn-action-button"]')
+        self.page.locator('[data-testid="copy-turn-action-button"]').click()
         result = pyperclip.paste()
         if result == "":
             raise ValueError("No response found")
