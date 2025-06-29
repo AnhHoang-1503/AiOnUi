@@ -59,6 +59,7 @@ class GPT(BaseModel):
             force=True,
             no_wait_after=True,
         )
+        time.sleep(1)
         result = pyperclip.paste()
         if result == "":
             raise ValueError("No response found")

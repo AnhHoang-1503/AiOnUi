@@ -45,6 +45,7 @@ class GPTAsync(BaseAsyncModel):
             force=True,
             no_wait_after=True,
         )
+        await self.page.wait_for_timeout(1000)
 
         result = pyperclip.paste()
         if result == "":
