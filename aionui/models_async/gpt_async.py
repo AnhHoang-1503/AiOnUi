@@ -41,7 +41,10 @@ class GPTAsync(BaseAsyncModel):
         pyperclip.copy("")
         # await self.page.keyboard.press(self.get_key_board_shortcut(KeyboardCommand.CopyLastArticle))
         await self.page.wait_for_selector('[data-testid="copy-turn-action-button"]')
-        await self.page.locator('[data-testid="copy-turn-action-button"]').click()
+        await self.page.locator('[data-testid="copy-turn-action-button"]').last.click(
+            force=True,
+            no_wait_after=True,
+        )
 
         result = pyperclip.paste()
         if result == "":
